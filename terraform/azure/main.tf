@@ -1,5 +1,4 @@
-# Create Resource Group
-resource "azurerm_resource_group" "examplerg" {
+resource "azurerm_resource_group" "tendermint-rg" {
   name     = "tendermint-demo"
-  location = "eastus2"
+  location = "westeurope"
 }
