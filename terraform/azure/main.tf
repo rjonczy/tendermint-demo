@@ -4,8 +4,8 @@ resource "azurerm_resource_group" "tendermint-rg" {
 }
 
 
-module "cluster" {
-  source           = "./cluster"
-  name             = "${var.NETWORK_NAME}"
-}
+# module "cluster" {
+#   source           = "./cluster"
+#   name             = "${var.NETWORK_NAME}"
+# }
 
