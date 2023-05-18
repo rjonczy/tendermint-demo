@@ -45,15 +45,12 @@ jobs:
         shell: bash
 
     steps:
-    # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
 
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
 
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
       run: terraform init
@@ -66,33 +63,14 @@ jobs:
         commenter_input: ${{ format('{0}{1}', steps.init.outputs.stdout, steps.init.outputs.stderr) }}
         commenter_exitcode: ${{ steps.init.outputs.exitcode }}
 
-    # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
       id: fmt
       run: terraform fmt -check
-
-    - name: Post Format
-      if: always() && github.ref != 'refs/heads/main' && (steps.fmt.outcome == 'success' || steps.fmt.outcome == 'failure')
-      uses: robburger/terraform-pr-commenter@v1
-      with:
-        commenter_type: fmt
-        commenter_input: ${{ format('{0}{1}', steps.fmt.outputs.stdout, steps.fmt.outputs.stderr) }}
-        commenter_exitcode: ${{ steps.fmt.outputs.exitcode }}
 
     - name: Terraform Validate
       id: validate
       run: terraform validate
 
-    - name: Post Validate
-      if: always() && github.ref != 'refs/heads/main' && (steps.validate.outcome == 'success' || steps.validate.outcome == 'failure')
-      uses: robburger/terraform-pr-commenter@v1
-      with:
-        commenter_type: validate
-        commenter_input: ${{ format('{0}{1}', steps.validate.outputs.stdout, steps.validate.outputs.stderr) }}
-        commenter_exitcode: ${{ steps.validate.outputs.exitcode }}
-
-
-    # Generates an execution plan for Terraform
     - name: Terraform Plan
       id: plan
       if: github.event_name == 'pull_request'
@@ -102,16 +80,6 @@ jobs:
       if: steps.plan.outcome == 'failure'
       run: exit 1
 
-    # post plan to PR's comment
-    - name: Post Plan
-      if: always() && github.ref != 'refs/heads/main' && (steps.plan.outcome == 'success' || steps.plan.outcome == 'failure')
-      uses: robburger/terraform-pr-commenter@v1
-      with:
-        commenter_type: plan
-        commenter_input: ${{ format('{0}{1}', steps.plan.outputs.stdout, steps.plan.outputs.stderr) }}
-        commenter_exitcode: ${{ steps.plan.outputs.exitcode }}
-
-    # On push to "main", build or change infrastructure according to Terraform configuration files
-    # - name: Terraform Apply
-    #   if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
-    #   run: terraform apply -auto-approve -input=false
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=false
