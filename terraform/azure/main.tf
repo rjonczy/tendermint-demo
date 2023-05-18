@@ -1,11 +1,11 @@
 variable "NETWORK_NAME" {
   description = "Name of the network"
-  default = "tendermint-demo"
+  default     = "tendermint-demo"
 }
 
 # cluster of 4 vms for tendermint cluster
 module "cluster" {
-  source           = "./cluster"
-  name             = "${var.NETWORK_NAME}"
+  source = "./cluster"
+  name   = var.NETWORK_NAME
 }
 
