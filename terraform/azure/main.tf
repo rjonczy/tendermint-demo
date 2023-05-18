@@ -1,6 +1,6 @@
 variable "NETWORK_NAME" {
   description = "Name of the network"
-  default     = "tendermint-demo"
+  default     = "cosmos-demo"
 }
 
 # cluster of 4 vms for tendermint cluster
