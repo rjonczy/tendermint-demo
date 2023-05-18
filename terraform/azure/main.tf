@@ -1,11 +1,11 @@
-resource "azurerm_resource_group" "tendermint-rg" {
-  name     = "tendermint-demo"
-  location = "westeurope"
+variable "NETWORK_NAME" {
+  description = "Name of the network"
+  default = "tendermint-demo"
 }
 
-
-# module "cluster" {
-#   source           = "./cluster"
-#   name             = "${var.NETWORK_NAME}"
-# }
+# cluster of 4 vms for tendermint cluster
+module "cluster" {
+  source           = "./cluster"
+  name             = "${var.NETWORK_NAME}"
+}
 
