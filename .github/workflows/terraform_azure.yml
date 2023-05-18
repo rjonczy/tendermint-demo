@@ -1,0 +1,117 @@
+# This workflow installs the latest version of Terraform CLI and configures the Terraform CLI configuration file
+# with a Service Principal for Microsoft Azure. 
+
+
+# On pull request events, this workflow will run:
+# `terraform init`, 
+# `terraform fmt`, and 
+# `terraform plan`
+
+# On push events to the "main" branch, `terraform apply` will be executed.
+#
+
+# Documentation for `hashicorp/setup-terraform` is located here: https://github.com/hashicorp/setup-terraform
+#
+
+name: 'Terraform Azure'
+
+on:
+  push:
+    paths:
+      - terraform/azure/**
+    branches:
+    - "main"
+  pull_request:
+    paths:
+      - terraform/azure/**
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: terraform/azure
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      id: init
+      run: terraform init
+
+    - name: Post Init
+      if: always() && github.ref != 'refs/heads/main' && (steps.init.outcome == 'success' || steps.init.outcome == 'failure')
+      uses: robburger/terraform-pr-commenter@v1
+      with:
+        commenter_type: init
+        commenter_input: ${{ format('{0}{1}', steps.init.outputs.stdout, steps.init.outputs.stderr) }}
+        commenter_exitcode: ${{ steps.init.outputs.exitcode }}
+
+    # Checks that all Terraform configuration files adhere to a canonical format
+    - name: Terraform Format
+      id: fmt
+      run: terraform fmt -check
+
+    - name: Post Format
+      if: always() && github.ref != 'refs/heads/main' && (steps.fmt.outcome == 'success' || steps.fmt.outcome == 'failure')
+      uses: robburger/terraform-pr-commenter@v1
+      with:
+        commenter_type: fmt
+        commenter_input: ${{ format('{0}{1}', steps.fmt.outputs.stdout, steps.fmt.outputs.stderr) }}
+        commenter_exitcode: ${{ steps.fmt.outputs.exitcode }}
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate
+
+    - name: Post Validate
+      if: always() && github.ref != 'refs/heads/main' && (steps.validate.outcome == 'success' || steps.validate.outcome == 'failure')
+      uses: robburger/terraform-pr-commenter@v1
+      with:
+        commenter_type: validate
+        commenter_input: ${{ format('{0}{1}', steps.validate.outputs.stdout, steps.validate.outputs.stderr) }}
+        commenter_exitcode: ${{ steps.validate.outputs.exitcode }}
+
+
+    # Generates an execution plan for Terraform
+    - name: Terraform Plan
+      id: plan
+      if: github.event_name == 'pull_request'
+      run: terraform plan -input=false
+
+    - name: Terraform Plan Status
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
+
+    # post plan to PR's comment
+    - name: Post Plan
+      if: always() && github.ref != 'refs/heads/main' && (steps.plan.outcome == 'success' || steps.plan.outcome == 'failure')
+      uses: robburger/terraform-pr-commenter@v1
+      with:
+        commenter_type: plan
+        commenter_input: ${{ format('{0}{1}', steps.plan.outputs.stdout, steps.plan.outputs.stderr) }}
+        commenter_exitcode: ${{ steps.plan.outputs.exitcode }}
+
+    # On push to "main", build or change infrastructure according to Terraform configuration files
+    # - name: Terraform Apply
+    #   if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
+    #   run: terraform apply -auto-approve -input=false
