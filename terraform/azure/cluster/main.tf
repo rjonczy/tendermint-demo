@@ -15,7 +15,7 @@ resource "azurerm_virtual_network" "network" {
 resource "azurerm_subnet" "subnet" {
   name                 = "tendermint"
   resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.my_terraform_network.name
+  virtual_network_name = azurerm_virtual_network.network.name
   address_prefixes     = ["192.168.10.0/24"]
 }
 
@@ -28,7 +28,7 @@ resource "azurerm_public_ip" "public_ip" {
 }
 
 # Create Network Security Group and rule
-resource "azurerm_network_security_group" "my_terraform_nsg" {
+resource "azurerm_network_security_group" "nsg" {
   name                = "tendermint-sg"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -54,16 +54,16 @@ resource "azurerm_network_interface" "nic" {
 
   ip_configuration {
     name                          = "nic_configuration"
-    subnet_id                     = azurerm_subnet.my_terraform_subnet.id
+    subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.my_terraform_public_ip.id
+    public_ip_address_id          = azurerm_public_ip.public_ip.id
   }
 }
 
 # Connect the security group to the network interface
 resource "azurerm_network_interface_security_group_association" "nic_nsg" {
-  network_interface_id      = azurerm_network_interface.my_terraform_nic.id
-  network_security_group_id = azurerm_network_security_group.my_terraform_nsg.id
+  network_interface_id      = azurerm_network_interface.nic.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
 # Generate random text for a unique storage account name
@@ -92,15 +92,15 @@ resource "tls_private_key" "example_ssh" {
 }
 
 # Create virtual machine
-resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
-  name                  = "myVM"
+resource "azurerm_linux_virtual_machine" "tendermint-node" {
+  name                  = "tendermint-node"
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
-  network_interface_ids = [azurerm_network_interface.my_terraform_nic.id]
+  network_interface_ids = [azurerm_network_interface.nic.id]
   size                  = "Standard_DS1_v2"
 
   os_disk {
-    name                 = "myOsDisk"
+    name                 = "osDisk"
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
   }
@@ -112,8 +112,8 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
     version   = "latest"
   }
 
-  computer_name                   = "myvm"
-  admin_username                  = "azureuser"
+  computer_name                   = "tendermint-node"
+  admin_username                  = "demo"
   disable_password_authentication = true
 
   admin_ssh_key {
