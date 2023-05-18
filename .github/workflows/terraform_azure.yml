@@ -65,7 +65,6 @@ jobs:
 
     - name: Terraform Plan
       id: plan
-      if: github.event_name == 'pull_request'
       run: terraform plan -input=false
 
     - name: Terraform Plan Status
