@@ -1,17 +1,15 @@
 resource "azurerm_resource_group" "rg" {
-  name     = "${var.name}"
+  name     = "${var.rg_name}"
   location = "westeurope"
 }
 
-# Create virtual network
 resource "azurerm_virtual_network" "network" {
-  name                = "demo"
+  name                = "tendermint-demo"
   address_space       = ["192.168.0.0/16"]
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 }
 
-# Create subnet
 resource "azurerm_subnet" "subnet" {
   name                 = "tendermint"
   resource_group_name  = azurerm_resource_group.rg.name
@@ -19,15 +17,6 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["192.168.10.0/24"]
 }
 
-# Create public IPs
-resource "azurerm_public_ip" "public_ip" {
-  name                = "tendermint-node-0"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
-}
-
-# Create Network Security Group and rule
 resource "azurerm_network_security_group" "nsg" {
   name                = "tendermint-sg"
   location            = azurerm_resource_group.rg.location
@@ -46,27 +35,35 @@ resource "azurerm_network_security_group" "nsg" {
   }
 }
 
-# Create network interface
+resource "azurerm_public_ip" "public_ip" {
+  for_each            = var.nodes
+  name                ="public_ip-${each.value.name}"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Dynamic"
+}
+
 resource "azurerm_network_interface" "nic" {
-  name                = "myNIC"
+
+  for_each            = var.nodes
+  name                = "nic-${each.value.name}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "nic_configuration"
+    name                          = "nic_conf"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.public_ip.id
+    public_ip_address_id          = azurerm_public_ip.public_ip[each.key].id
   }
 }
 
-# Connect the security group to the network interface
 resource "azurerm_network_interface_security_group_association" "nic_nsg" {
-  network_interface_id      = azurerm_network_interface.nic.id
+  for_each                  = var.nodes
+  network_interface_id      = azurerm_network_interface.nic[each.key].id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-# Generate random text for a unique storage account name
 resource "random_id" "random_id" {
   keepers = {
     # Generate a new ID only when a new resource group is defined
@@ -76,8 +73,7 @@ resource "random_id" "random_id" {
   byte_length = 8
 }
 
-# Create storage account for boot diagnostics
-resource "azurerm_storage_account" "my_storage_account" {
+resource "azurerm_storage_account" "diag_storage_account" {
   name                     = "diag${random_id.random_id.hex}"
   location                 = azurerm_resource_group.rg.location
   resource_group_name      = azurerm_resource_group.rg.name
@@ -85,19 +81,13 @@ resource "azurerm_storage_account" "my_storage_account" {
   account_replication_type = "LRS"
 }
 
-# Create (and display) an SSH key
-resource "tls_private_key" "example_ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-# Create virtual machine
 resource "azurerm_linux_virtual_machine" "tendermint-node" {
-  name                  = "tendermint-node"
+  for_each              = var.nodes
+  name                  = each.value.name
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
-  network_interface_ids = [azurerm_network_interface.nic.id]
-  size                  = "Standard_DS1_v2"
+  network_interface_ids = [azurerm_network_interface.nic[each.key].id]
+  size                  = each.value.vm_size
 
   os_disk {
     name                 = "osDisk"
@@ -112,20 +102,18 @@ resource "azurerm_linux_virtual_machine" "tendermint-node" {
     version   = "latest"
   }
 
-  computer_name                   = "tendermint-node"
-  admin_username                  = "demo"
+  computer_name                   = each.value.name
+  admin_username                  = "rjonczy"
   disable_password_authentication = true
 
   admin_ssh_key {
-    username   = "demo"
-    public_key = tls_private_key.example_ssh.public_key_openssh
+    username   = "rjonczy"
+    public_key = var.admin_ssh_key
   }
 
   boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.my_storage_account.primary_blob_endpoint
+    storage_account_uri = azurerm_storage_account.diag_storage_account.primary_blob_endpoint
   }
 }
-
-
 
 
