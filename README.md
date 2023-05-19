@@ -44,8 +44,6 @@ Four validator nodes that have the following voting power:
 |  `validator-18`   |     18%      | `tendermint-node-2.demo.jonczy.dev` |
 |  `validator-30`   |     30%      | `tendermint-node-3.demo.jonczy.dev` |
 
-### Test transactions
-
 ### Logs
 
 This are logs from one of the nodes. We can see that network is progressing.
