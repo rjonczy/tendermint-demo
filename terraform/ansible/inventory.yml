@@ -1,0 +1,45 @@
+---
+# yamllint disable rule:line-length
+all:
+  vars:
+    ansible_user: rjonczy
+    chain_version: v9.0.3
+    chain_id: cosmos-rjonczy
+    minimum_gas_prices: '0.001uatom'
+    chain_home_clear: true
+    chain_api_host: "rest"
+    chain_rpc_host: "rpc"
+    chain_p2p_host: "p2p"
+    chain_grpc_host: "grpc"
+    swap_size: 8192
+    genesis_node: tendermint-node-0.demo.jonczy.dev
+    dynamic_p2p_persistent_peers: true
+    bonded_tokens_pool: 100000000
+    bonded_supply_divider: 10
+  children:
+    node:
+      hosts:
+        tendermint-node-0.demo.jonczy.dev:
+          chain_create_validator: true
+          validator_moniker: validator-30
+          voting_power: 30
+          chain_gentx_validator: "{{ (bonded_tokens_pool|int * voting_power|int / 100)|int }}"
+          chain_validator_coins: "{{ (bonded_supply_divider * chain_gentx_validator|int | int +chain_gentx_validator|int)|int }}"
+        tendermint-node-1.demo.jonczy.dev:
+          validator_moniker: validator-22
+          start_multinode: true
+          voting_power: 22
+          chain_gentx_validator: "{{ (bonded_tokens_pool|int * voting_power|int / 100)|int }}"
+          chain_validator_coins: "{{ (bonded_supply_divider * chain_gentx_validator|int | int +chain_gentx_validator|int)|int }}"
+        tendermint-node-2.demo.jonczy.dev:
+          validator_moniker: validator-18
+          start_multinode: true
+          voting_power: 18
+          chain_gentx_validator: "{{ (bonded_tokens_pool|int * voting_power|int / 100)|int }}"
+          chain_validator_coins: "{{ (bonded_supply_divider * chain_gentx_validator|int | int +chain_gentx_validator|int)|int }}"
+        tendermint-node-3.demo.jonczy.dev:
+          validator_moniker: validator-30
+          start_multinode: true
+          voting_power: 30
+          chain_gentx_validator: "{{ (bonded_tokens_pool|int * voting_power|int / 100)|int }}"
+          chain_validator_coins: "{{ (bonded_supply_divider * chain_gentx_validator|int | int +chain_gentx_validator|int)|int }}"
