@@ -116,4 +116,7 @@ resource "azurerm_linux_virtual_machine" "tendermint-node" {
   # }
 }
 
-
+resource "azurerm_dns_zone" "cosmos-zone" {
+  name                = "demo.jonczy.dev"
+  resource_group_name = azurerm_resource_group.rg.name
+}
