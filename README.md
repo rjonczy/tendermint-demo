@@ -25,7 +25,7 @@ Nodes:
 - [`.github/workflows/terraform_azure.yml`](.github/workflows/terraform_azure.yml)
 
 First automation is used to provision Azure infrastructure via terraform
-Second automation is used to configure virtual machines via Ansible
+Second automation is used to configure virtual machines via Ansible. Setup of network is based on this [Ansile role](https://github.com/hyphacoop/cosmos-ansible)
 
 
 
