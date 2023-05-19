@@ -1,0 +1,20 @@
+---
+name: Setup nodes
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup_nodes:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo 
+      uses: actions/checkout@v3
+      with:
+        path: demo
+    - name: Checkout hyphacoop/cosmos-ansible repo
+      uses: actions/checkout@v3
+      with:
+        repository: hyphacoop/cosmos-ansible
+        path: cosmos-ansible
+  
