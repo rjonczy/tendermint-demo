@@ -43,6 +43,15 @@ resource "azurerm_public_ip" "public_ip" {
   allocation_method   = "Dynamic"
 }
 
+resource "azurerm_dns_a_record" "example" {
+  for_each            = var.nodes
+  name                = "${each.value.name}"
+  zone_name           = azurerm_dns_zone.cosmos-zone.name
+  resource_group_name = azurerm_resource_group.rg.name
+  ttl                 = 300
+  target_resource_id  = azurerm_public_ip.public_ip[each.key].id
+}
+
 resource "azurerm_network_interface" "nic" {
 
   for_each            = var.nodes
@@ -120,3 +129,4 @@ resource "azurerm_dns_zone" "cosmos-zone" {
   name                = "demo.jonczy.dev"
   resource_group_name = azurerm_resource_group.rg.name
 }
+
