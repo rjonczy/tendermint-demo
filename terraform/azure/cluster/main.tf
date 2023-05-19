@@ -74,7 +74,7 @@ resource "random_id" "random_id" {
 }
 
 resource "azurerm_storage_account" "diag_storage_account" {
-  name                     = "diag${random_id.random_id.hex}"
+  name                     = "diagtendermintdemo"
   location                 = azurerm_resource_group.rg.location
   resource_group_name      = azurerm_resource_group.rg.name
   account_tier             = "Standard"

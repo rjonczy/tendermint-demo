@@ -11,9 +11,21 @@ variable "nodes" {
     description = "Nodes"
     type = map
     default = {
-      "node_0" : { name = "tendermint-node-0", vm_size = "Standard_DS1_v2" },
-      "node_1" : { name = "tendermint-node-1", vm_size = "Standard_DS1_v2" },
-      "node_2" : { name = "tendermint-node-2", vm_size = "Standard_DS1_v2" },
-      "node_3" : { name = "tendermint-node-3", vm_size = "Standard_DS1_v2" }
+      "node_0" : { 
+        name = "tendermint-node-0", 
+        vm_size = "Standard_DS1_v2" 
+      },
+      "node_1" : { 
+        name = "tendermint-node-1", 
+        vm_size = "Standard_DS1_v2"
+      },
+      "node_2" : { 
+        name = "tendermint-node-2", 
+        vm_size = "Standard_DS1_v2" 
+      },
+      "node_3" : { 
+        name = "tendermint-node-3", 
+        vm_size = "Standard_DS1_v2" 
+      }
     }
 }
