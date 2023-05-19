@@ -73,13 +73,13 @@ resource "random_id" "random_id" {
   byte_length = 8
 }
 
-resource "azurerm_storage_account" "diag_storage_account" {
-  name                     = "diagtendermintdemo"
-  location                 = azurerm_resource_group.rg.location
-  resource_group_name      = azurerm_resource_group.rg.name
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-}
+# resource "azurerm_storage_account" "diag_storage_account" {
+#   name                     = "diagtendermintdemo"
+#   location                 = azurerm_resource_group.rg.location
+#   resource_group_name      = azurerm_resource_group.rg.name
+#   account_tier             = "Standard"
+#   account_replication_type = "LRS"
+# }
 
 resource "azurerm_linux_virtual_machine" "tendermint-node" {
   for_each              = var.nodes
@@ -90,7 +90,7 @@ resource "azurerm_linux_virtual_machine" "tendermint-node" {
   size                  = each.value.vm_size
 
   os_disk {
-    name                 = "osDisk"
+    name                 = "${each.value.name}-osdisk"
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
   }
@@ -111,9 +111,9 @@ resource "azurerm_linux_virtual_machine" "tendermint-node" {
     public_key = var.admin_ssh_key
   }
 
-  boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.diag_storage_account.primary_blob_endpoint
-  }
+  # boot_diagnostics {
+  #   storage_account_uri = azurerm_storage_account.diag_storage_account.primary_blob_endpoint
+  # }
 }
 
 
