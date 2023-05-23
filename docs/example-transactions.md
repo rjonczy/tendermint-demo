@@ -127,3 +127,17 @@ pagination:
   next_key: null
   total: "0"
 ```
+
+Transaction executed in block `56987`
+```
+May 23 06:45:26 tendermint-node-0 cosmovisor[1529]: 6:45AM INF received complete proposal block hash=F8F3DBE700B7BF2147DDE8F531E38F05645CFEE3D5DB5FF87C50CD8EF2566BBE height=56987 module=consensus
+May 23 06:45:27 tendermint-node-0 cosmovisor[1529]: 6:45AM INF finalizing commit of block hash={} height=56987 module=consensus num_txs=1 root=BC7FE58805F670743AFA26149787764E08110DDE7D832B8AF5BCC2EA7E27A993
+May 23 06:45:27 tendermint-node-0 cosmovisor[1529]: 6:45AM INF minted coins from module account amount=22uatom from=mint module=x/bank
+May 23 06:45:27 tendermint-node-0 cosmovisor[1529]: 6:45AM INF executed block height=56987 module=state num_invalid_txs=0 num_valid_txs=1
+May 23 06:45:27 tendermint-node-0 cosmovisor[1529]: 6:45AM INF commit synced commit=436F6D6D697449447B5B313439203230352035382032343120393720313435203639203230203220313032203932203833203235342031323120363520313736
+20323130203533203138312035302031313220393020323235203139362032313320313933203533203135312032303720323920332038305D3A444539427D
+May 23 06:45:27 tendermint-node-0 cosmovisor[1529]: 6:45AM INF committed state app_hash=95CD3AF16191451402665C53FE7941B0D235B532705AE1C4D5C13597CF1D0350 height=56987 module=state num_txs=1
+May 23 06:45:27 tendermint-node-0 cosmovisor[1529]: 6:45AM INF indexed block exents height=56987 module=txindex
+May 23 06:45:32 tendermint-node-0 cosmovisor[1529]: 6:45AM INF Timed out dur=4977.167929 height=56988 module=consensus round=0 step=1
+May 23 06:45:32 tendermint-node-0 cosmovisor[1529]: 6:45AM INF received proposal module=consensus proposal={"Type":32,"block_id":{"hash":"702376A06FDBFCD8DA885672E9419CC3C7D06FA4B9AC08C27532463133D7F86B","parts":{"hash":"B2FE2EAC509EB1CA10EA5588CE547832945709F326FBC14436F3CC61E8BF37BC","total":1}},"height":56988,"pol_round":-1,"round":0,"signature":"bH+1vFSjwiQxUSH1Vt41yVxXptqJYkmWmndnWT6NYW8M0wd4pwPPjaTRjAPla/mByoKciqFM/t5toj0CFpAMAQ==","timestamp":"2023-05-23T10:45:32.293939051Z"}
+```
